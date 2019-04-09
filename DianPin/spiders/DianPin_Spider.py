@@ -9,5 +9,4 @@ class DianpinSpider(scrapy.Spider):
 
     def parse(self, response):
 
-        print("test")
         pass
