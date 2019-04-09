@@ -9,4 +9,6 @@ class DianpinSpider(scrapy.Spider):
 
     def parse(self, response):
 
+        node_list = response.xpath("//div[@class='content']//ul//li//div[@class='tit']//h4")
+
         pass
