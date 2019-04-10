@@ -19,13 +19,20 @@ class DianpinSpider(scrapy.Spider):
 
         print(title[0])
 
+        css_url = "http:" + re.search('(//.+svgtextcss.+\.css)', response.text).group()
+
         result = requests.get(
             'https://s3plus.meituan.net/v1/mss_0a06a471f9514fc79c981b5466f56b91/svgtextcss/2416ff021a8fccb10b15e20ca8d5711c.svg')
         tree = lxml.html.fromstring(result.content)
+
         a = tree.xpath('//text[@y="36"]/text()')[0]
         b = tree.xpath('//text[@y="78"]/text()')[0]
         c = tree.xpath('//text[@y="127"]/text()')[0]
         d = tree.xpath('//text[@y="172"]/text()')[0]
+
+
+
+        "//div[@class='main']//div[@id='basic-info']//p[@class='expand-info tel']"
 
         # x ,y 是得到的两个坐标点
         # 调用上面的函数
