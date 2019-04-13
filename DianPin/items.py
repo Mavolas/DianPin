@@ -11,6 +11,7 @@ import scrapy
 class DianpinItem(scrapy.Item):
     # define the fields for your item here like:
     # name = scrapy.Field()
+    id = scrapy.Field()
     name = scrapy.Field()
     star = scrapy.Field()
     commentCount = scrapy.Field()
@@ -19,5 +20,3 @@ class DianpinItem(scrapy.Item):
     taste = scrapy.Field()
     environ = scrapy.Field()
     service = scrapy.Field()
-
-    pass

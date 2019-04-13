@@ -101,6 +101,10 @@ ITEM_PIPELINES = {
    'DianPin.pipelines.DianpinPipeline': 300,
 }
 
+DOWNLOADER_MIDDLEWARES = {
+    'DianPin.pipelines.ProxyMiddleware': 543,
+}
+
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://doc.scrapy.org/en/latest/topics/autothrottle.html
 #AUTOTHROTTLE_ENABLED = True
@@ -121,3 +125,5 @@ ITEM_PIPELINES = {
 #HTTPCACHE_DIR = 'httpcache'
 #HTTPCACHE_IGNORE_HTTP_CODES = []
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
+# 修改编码为utf-8
+FEED_EXPORT_ENCODING = 'utf-8'

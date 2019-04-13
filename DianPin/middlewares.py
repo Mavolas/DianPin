@@ -4,6 +4,8 @@
 #
 # See documentation in:
 # https://doc.scrapy.org/en/latest/topics/spider-middleware.html
+import random
+
 
 from scrapy import signals
 
@@ -101,3 +103,22 @@ class DianpinDownloaderMiddleware(object):
 
     def spider_opened(self, spider):
         spider.logger.info('Spider opened: %s' % spider.name)
+
+class ProxyMiddleware(object):
+    '''
+    设置Proxy
+    '''
+
+    def __init__(self, ip):
+        self.ip = ip
+
+    # @classmethod
+    # def from_crawler(cls, crawler):
+    #     "http://api.xdaili.cn/xdaili-api//newExclusive/getIp?spiderId=981e494f79b64d5fb833d7aa00e006b6&orderno=DX20194132294OuZGt2&returnType=1&count=1&machineArea="
+    #
+    #
+    #     return cls(ip=crawler.settings.get('PROXIES'))
+
+    def process_request(self, request, spider):
+        ip = random.choice(self.ip)
+        request.meta['proxy'] = "http://api.xdaili.cn/xdaili-api//newExclusive/getIp?spiderId=981e494f79b64d5fb833d7aa00e006b6&orderno=DX20194132294OuZGt2&returnType=1&count=1&machineArea="

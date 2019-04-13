@@ -11,10 +11,11 @@ import json
 class DianpinPipeline(object):
 
     def __init__(self):
-        self.f = open("tencent.json", "w")
+        self.f = open("tencent.json", "w",encoding="utf-8")
 
     def process_item(self, item, spider):
         content = json.dumps(dict(item), ensure_ascii=False) + ",\n"
+
         self.f.write(content)
 
         return item
