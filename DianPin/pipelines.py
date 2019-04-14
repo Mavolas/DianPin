@@ -6,8 +6,9 @@
 # See: https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 
 import json
+from openpyxl import Workbook
 
-
+# json
 class DianpinPipeline(object):
 
     def __init__(self):
@@ -22,3 +23,19 @@ class DianpinPipeline(object):
 
     def close_spider(self, spider):
         self.f.close()
+
+
+class ExcelPipeline(object):
+
+    def __init__(self):
+        self.wb = Workbook()
+        self.ws = self.wb.active
+
+        self.ws.append(['id','area','type','name','star','phone','commentCount','address'])
+
+    def process_item(self, item, spider):
+
+        line = [item['id'],item['area'],item['type'],item['name'],item['star'],item['phone'],item['commentCount'],item['address']]
+        self.ws.append(line)
+        self.wb.save('DianPin.xlsx')
+        return item

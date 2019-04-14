@@ -10,12 +10,12 @@ from DianPin.items import DianpinItem
 from scrapy.http import Request
 from urllib import parse
 from fake_useragent import UserAgent
-
+import time
 
 class DianpinSpider(scrapy.Spider):
     name = 'DianPin_Spider'
     allowed_domains = ['dianping.com']
-    start_urls = ['http://www.dianping.com/chengdu/ch10/g219r1591']
+    start_urls = ['http://www.dianping.com/chengdu/ch10/g102r7949']
 
     def parse(self, response):
         # node_list = response.xpath("//div[@class='content']//ul//li//div[@class='tit']//h4")
@@ -33,10 +33,14 @@ class DianpinSpider(scrapy.Spider):
 
     def parse_detail(self, response):
 
+
         dianpin_item = DianpinItem()
 
-        title = response.xpath("//div[@id='basic-info']//h1[@class='shop-name']/text()").extract()[0]
+        id =  response.request.url.rpartition("/")[2]
+        name = response.xpath("//div[@id='basic-info']//h1[@class='shop-name']/text()").extract()[0]
         star = response.xpath("//*[@id='basic-info']/div[1]/span[1]/@title").extract()[0]
+        area = response.xpath("//div[@class='breadcrumb']//a[1]/text()").extract()[0]
+        type = response.xpath("//div[@class='breadcrumb']//a[2]/text()").extract()[0]
 
         # 获取svg表格中被替换的数据
         def get_hide_char(x, y, type, url):
@@ -119,7 +123,7 @@ class DianpinSpider(scrapy.Spider):
             html = html.text
             for tag in b:
                 # 遇到类别标签则分类进行筛选
-                if tag[0] == 'span' or tag[0] == 'cc' or tag[0] == 'bb' or tag[0] == 'd':
+                if tag[0] == 'span' or tag[0] == 'cc' or tag[0] == 'bb' or tag[0] == 'd' or tag[0] == 'e':
                     hide_char = get_position_xy(html, tag[1], tag[0], url)
                     result.append(hide_char)
                 # 防止被其它标签干扰
@@ -131,27 +135,48 @@ class DianpinSpider(scrapy.Spider):
             return ''.join(result).strip('\n').strip()
 
         html = lxml.html.fromstring(response.text)
-        # 找到标签数据，必须要保留标签，这里以商店地址为例
-        rule = re.compile('<p class="expand-info tel">(.*?)</p>', re.S)
-        address = re.findall(rule, response.text)[0]
-        address = address.strip().replace('\n', '').replace('&nbsp', '')
-        address = address.replace('<span class="info-name">电话：</span>', "")
+
+
+        # 找到标签数据，必须要保留标签,解密phone
+        rulePhone = re.compile('<p class="expand-info tel">(.*?)</p>', re.S)
+        PhoneEncode = re.findall(rulePhone, response.text)[0]
+        PhoneEncode = PhoneEncode.strip().replace('\n', '').replace('&nbsp', '')
+        PhoneEncode = PhoneEncode.replace('<span class="info-name">电话：</span>', "")
         # 找到css表，css表链接存放位置固定，所以直接获取
-        css = html.xpath('//link[@rel="stylesheet"]/@href')[1]
-        url = 'http:' + css.strip()
-        result = get_hide_string(address, url)
-        result = result.replace(' ', '')
+        cssPhone = html.xpath('//link[@rel="stylesheet"]/@href')[1]
+        urlPhone = 'http:' + cssPhone.strip()
+        Phone = get_hide_string(PhoneEncode, urlPhone)
+        Phone = Phone.replace(' ', '')
 
-        print(title)
-        print('解密前数据：' + address)
-        print('解密后数据：' + result)
+        # 找到标签数据，必须要保留标签,解密评论数
+        rulereviewCount = re.compile('<span id="reviewCount" class="item">(.*?)</span>', re.S)
+        reviewCountEncode = re.findall(rulereviewCount, response.text)[0]
+        reviewCountEncode = reviewCountEncode.strip().replace('\n', '').replace('&nbsp', '')
+        # 找到css表，css表链接存放位置固定，所以直接获取
+        cssreviewCount = html.xpath('//link[@rel="stylesheet"]/@href')[1]
+        urlreviewCount = 'http:' + cssreviewCount.strip()
+        reviewCount = get_hide_string(reviewCountEncode, urlreviewCount)
+        reviewCount = reviewCount.replace(' ', '')
 
-        dianpin_item["id"] = title
-        dianpin_item["name"] = title
-        dianpin_item["phone"] = result
+        # 找到标签数据，必须要保留标签,解密地址
+        ruleAddress = re.compile('<span class="item" itemprop="street-address" id="address">(.*?)</span>', re.S)
+        AddressEncode = re.findall(ruleAddress, response.text)[0]
+        AddressEncode = AddressEncode.strip().replace('\n', '').replace('&nbsp', '')
+        # 找到css表，css表链接存放位置固定，所以直接获取
+        cssAddress = html.xpath('//link[@rel="stylesheet"]/@href')[1]
+        urlAddress = 'http:' + cssAddress.strip()
+        Address = get_hide_string(AddressEncode, urlAddress)
+        Address = Address.replace(' ', '')
+
+        dianpin_item["id"] = id
+        dianpin_item["name"] = name
+        dianpin_item["area"] = area
+        dianpin_item["type"] = type
+        dianpin_item["phone"] = Phone
         dianpin_item["star"] = star
+        dianpin_item["commentCount"] = reviewCount
+        dianpin_item["address"] = Address
 
         yield dianpin_item
-        
-        # dianpin_item["phone"] = result
+
 

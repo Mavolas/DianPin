@@ -6,8 +6,11 @@
 # https://doc.scrapy.org/en/latest/topics/spider-middleware.html
 import random
 
-
 from scrapy import signals
+from fake_useragent import UserAgent
+import requests
+import time
+import threading
 
 
 class DianpinSpiderMiddleware(object):
@@ -104,21 +107,29 @@ class DianpinDownloaderMiddleware(object):
     def spider_opened(self, spider):
         spider.logger.info('Spider opened: %s' % spider.name)
 
-class ProxyMiddleware(object):
-    '''
-    设置Proxy
-    '''
 
-    def __init__(self, ip):
-        self.ip = ip
+class RandomUserAgentMiddlware(object):
 
-    # @classmethod
-    # def from_crawler(cls, crawler):
-    #     "http://api.xdaili.cn/xdaili-api//newExclusive/getIp?spiderId=981e494f79b64d5fb833d7aa00e006b6&orderno=DX20194132294OuZGt2&returnType=1&count=1&machineArea="
-    #
-    #
-    #     return cls(ip=crawler.settings.get('PROXIES'))
+    def func1(self):
+        print
+        'hello timer!'
+
+    # 随机切换UA
+
+    def __init__(self):
+        super(RandomUserAgentMiddlware, self).__init__()
+        self.ua = UserAgent()
+
+    @classmethod
+    def from_crawler(cls, crawler):
+        return cls()
 
     def process_request(self, request, spider):
-        ip = random.choice(self.ip)
-        request.meta['proxy'] = "http://api.xdaili.cn/xdaili-api//newExclusive/getIp?spiderId=981e494f79b64d5fb833d7aa00e006b6&orderno=DX20194132294OuZGt2&returnType=1&count=1&machineArea="
+        # time.sleep(20)
+        time.sleep(2)
+        # re = requests.get("http://api.xdaili.cn/xdaili-api//newExclusive/getIp?spiderId=981e494f79b64d5fb833d7aa00e006b6&orderno=DX20194132294OuZGt2&returnType=1&count=1&machineArea=")
+        request.headers.setdefault("User-Agent", self.ua.random)
+        # re = re.text.replace('\n',"")
+        # timer = threading.Timer(20, func1)
+        # timer.start()
+        # request.meta['proxy'] = "http://183.165.43.144:20397"
